@@ -1,0 +1,12 @@
+logging.level: info
+
+filebeat.inputs:
+- type: log
+  paths:
+  - '/log_to_test/*.log'
+
+output.logstash:
+  hosts: ["logstash:5044"]
+
+#  elasticsearch:
+#    hosts: ["elasticsearch:9200"]

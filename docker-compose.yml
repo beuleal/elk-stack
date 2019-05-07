@@ -1,0 +1,70 @@
+version: '3.7'
+
+services:
+
+  elasticsearch:
+    build:
+      context: elasticsearch/
+      dockerfile: .Dockerfile.tmp
+    volumes:
+      - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - elk
+
+  logstash:
+    build:
+      context: logstash/
+      dockerfile: .Dockerfile.tmp
+    volumes:
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./logstash/pipeline:/usr/share/logstash/pipeline
+      - ./logstash/filters:/usr/share/logstash/custom-filters
+    ports:
+      - "5000:5000"
+#   DEBUG: if you want to enable log level debug add "--debug" as parameter for command
+#          If you want to reload the conf file add "-f apache.config --config.reload.automatic"
+    command: logstash -f /usr/share/logstash/pipeline/logstash.conf --config.reload.automatic
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+
+  filebeat:
+    build:
+      context: filebeat/
+      dockerfile: .Dockerfile.tmp
+    volumes:
+      - ./filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./filebeat/log_to_test:/log_to_test
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - elk
+    user: root
+    command: filebeat -e -strict.perms=false
+    depends_on:
+      - logstash
+
+  kibana:
+    build:
+      context: kibana/
+      dockerfile: .Dockerfile.tmp
+    volumes:
+      - ./kibana/config/:/usr/share/kibana/config
+    ports:
+      - "5601:5601"
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+
+networks:
+
+  elk:
+    driver: bridge
