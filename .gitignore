@@ -1,0 +1,8 @@
+.idea
+*.tmp
+*.gem
+*/log_to_test/*
+*/logstash/filters/*
+*/filters/*
+*.backup
+*.log
