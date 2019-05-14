@@ -17,7 +17,7 @@ cat elasticsearch/Dockerfile | \
  sed  -e 's/_STACK_VERSION_/'$VERSION'/g' \
  > elasticsearch/.Dockerfile.tmp
 
-# Logstash
+# kibana
 cat kibana/Dockerfile | \
  sed  -e 's/_STACK_VERSION_/'$VERSION'/g' \
  > kibana/.Dockerfile.tmp
