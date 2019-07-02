@@ -20,17 +20,22 @@ services:
     build:
       context: logstash/
       dockerfile: .Dockerfile.tmp
+    environment:
     volumes:
       - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
       - ./logstash/pipeline:/usr/share/logstash/pipeline
       - ./logstash/filters:/usr/share/logstash/custom-filters
     ports:
       - "5000:5000"
-#   DEBUG: if you want to enable log level debug add "--debug" as parameter for command
-#          If you want to reload the conf file add "-f apache.config --config.reload.automatic"
+      - "9600:9600"
+      #   DEBUG: if you want to enable log level debug add "--debug" as parameter for command
+      #          If you want to reload the conf file add "-f apache.config --config.reload.automatic"
     command: logstash -f /usr/share/logstash/pipeline/logstash.conf --config.reload.automatic
     environment:
       LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      MAX_MESSAGE_SIZE_BYTES: "498000"
+      MAX_EVENT_SIZE_MULTIPLIER: "2.5"
+      DEBUG_EVENT_DISCARD: "false"
     networks:
       - elk
     depends_on:
@@ -65,6 +70,5 @@ services:
       - elasticsearch
 
 networks:
-
   elk:
     driver: bridge
